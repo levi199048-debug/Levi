@@ -1,0 +1,323 @@
+--[[
+    AFK HUB - DELTA EDITION (ULTIMATE)
+    Funcionalidades: 
+    - Auto-Pega ao encostar
+    - Atravessar Paredes com Ponte Roxa (Aba Outros)
+    - God Mode Restaurado (Cura Rápida)
+]]
+
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local ToggleBtn = Instance.new("TextButton")
+local TabContainer = Instance.new("Frame")
+local MainTabBtn = Instance.new("TextButton")
+local OtherTabBtn = Instance.new("TextButton")
+local MainContent = Instance.new("Frame")
+local OtherContent = Instance.new("Frame")
+local StatusLabel = Instance.new("TextLabel")
+local TitleLabel = Instance.new("TextLabel")
+
+-- Configurações Iniciais
+ScreenGui.Name = "AFKHub_Touch_Edition"
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.ResetOnSpawn = false
+
+-- 1. INTRO RÁPIDA
+local function runIntro()
+    local IntroText = Instance.new("TextLabel", ScreenGui)
+    IntroText.BackgroundTransparency = 1
+    IntroText.Position = UDim2.new(0.5, -250, 0.4, 0)
+    IntroText.Size = UDim2.new(0, 500, 0, 100)
+    IntroText.Font = Enum.Font.GothamBold
+    IntroText.Text = "Bem vindo ao AFK Hub"
+    IntroText.TextColor3 = Color3.fromRGB(160, 32, 240)
+    IntroText.TextSize = 45
+    IntroText.ZIndex = 10
+    
+    task.wait(2)
+    IntroText:Destroy()
+    ToggleBtn.Visible = true
+    MainFrame.Visible = true
+end
+
+-- 2. BOTÃO FLUTUANTE
+ToggleBtn.Parent = ScreenGui
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(160, 32, 240)
+ToggleBtn.Position = UDim2.new(0.1, 0, 0.5, 0)
+ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+ToggleBtn.Text = "AFK"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.TextSize = 14
+ToggleBtn.Visible = false
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
+Instance.new("UIStroke", ToggleBtn).Color = Color3.fromRGB(255, 255, 255)
+
+-- 3. PAINEL PRINCIPAL
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MainFrame.Position = UDim2.new(0.5, -110, 0.5, -150)
+MainFrame.Size = UDim2.new(0, 220, 0, 320)
+MainFrame.Visible = false
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+local strokeM = Instance.new("UIStroke", MainFrame)
+strokeM.Color = Color3.fromRGB(160, 32, 240)
+strokeM.Thickness = 3
+
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+TitleLabel.Position = UDim2.new(0, 0, 0, 5)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Text = "AFK Hub"
+TitleLabel.TextColor3 = Color3.fromRGB(160, 32, 240)
+TitleLabel.TextSize = 22
+
+-- ABAS
+TabContainer.Parent = MainFrame
+TabContainer.BackgroundTransparency = 1
+TabContainer.Position = UDim2.new(0, 0, 0, 45)
+TabContainer.Size = UDim2.new(1, 0, 0, 35)
+
+MainTabBtn.Parent = TabContainer
+MainTabBtn.Size = UDim2.new(0.5, 0, 1, 0)
+MainTabBtn.Text = "Principal"
+MainTabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainTabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+OtherTabBtn.Parent = TabContainer
+OtherTabBtn.Position = UDim2.new(0.5, 0, 0, 0)
+OtherTabBtn.Size = UDim2.new(0.5, 0, 1, 0)
+OtherTabBtn.Text = "Outros"
+OtherTabBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+OtherTabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+
+MainContent.Parent = MainFrame
+MainContent.Position = UDim2.new(0, 0, 0, 85)
+MainContent.Size = UDim2.new(1, 0, 1, -110)
+MainContent.BackgroundTransparency = 1
+
+OtherContent.Parent = MainFrame
+OtherContent.Position = UDim2.new(0, 0, 0, 85)
+OtherContent.Size = UDim2.new(1, 0, 1, -110)
+OtherContent.BackgroundTransparency = 1
+OtherContent.Visible = false
+
+StatusLabel.Parent = MainFrame
+StatusLabel.Position = UDim2.new(0, 0, 1, -25)
+StatusLabel.Size = UDim2.new(1, 0, 0, 20)
+StatusLabel.Text = "Status: Pronto"
+StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+StatusLabel.BackgroundTransparency = 1
+
+-- FUNÇÃO CRIAR BOTÃO
+local function createBtn(text, pos, parent)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(0.85, 0, 0, 40)
+    btn.Position = pos
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamSemibold
+    btn.TextSize = 13
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    return btn
+end
+
+-- BOTÕES ABA PRINCIPAL
+local ActionBtn = createBtn("DELETAR VIP", UDim2.new(0.075, 0, 0.05, 0), MainContent)
+local GodModeBtn = createBtn("ATIVAR GOD MODE", UDim2.new(0.075, 0, 0.25, 0), MainContent)
+local SaveTPBtn = createBtn("SALVAR POSIÇÃO", UDim2.new(0.075, 0, 0.45, 0), MainContent)
+local TeleportBtn = createBtn("TELEPORTAR", UDim2.new(0.075, 0, 0.65, 0), MainContent)
+
+-- BOTÕES ABA OUTROS
+local BrainrotBtn = createBtn("AUTO-PEGA: OFF", UDim2.new(0.075, 0, 0.05, 0), OtherContent)
+local WallClipBtn = createBtn("ATRAVESSAR PAREDES", UDim2.new(0.075, 0, 0.25, 0), OtherContent)
+
+-- LÓGICA DE TROCA DE ABAS
+MainTabBtn.MouseButton1Click:Connect(function()
+    MainContent.Visible = true; OtherContent.Visible = false
+    MainTabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20); OtherTabBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+end)
+
+OtherTabBtn.MouseButton1Click:Connect(function()
+    MainContent.Visible = false; OtherContent.Visible = true
+    OtherTabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20); MainTabBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+end)
+
+-- LÓGICA DAS FUNÇÕES
+local player = game:GetService("Players").LocalPlayer
+local vipActive, godActive, brainrotActive, wallClipActive = false, false, false, false
+local savedPos = nil
+local originalTexts = {}
+
+-- VIP
+ActionBtn.MouseButton1Click:Connect(function()
+    vipActive = not vipActive
+    if vipActive then
+        ActionBtn.Text = "VIP: DELETADO"; ActionBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("BasePart") and (v.Name:lower():find("vip") or v.Name:lower():find("wall")) then v.CanCollide = false; v.Transparency = 0.7 end
+            if v:IsA("TextLabel") or v:IsA("TextBox") then
+                if v.Text:upper():find("VIP") then originalTexts[v] = {text = v.Text, color = v.TextColor3}; v.Text = "AFK Hub"; v.TextColor3 = Color3.fromRGB(160, 32, 240) end
+            end
+        end
+    else
+        ActionBtn.Text = "DELETAR VIP"; ActionBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        for obj, data in pairs(originalTexts) do if obj and obj.Parent then obj.Text = data.text; obj.TextColor3 = data.color end end
+        originalTexts = {}
+        for _, v in pairs(workspace:GetDescendants()) do if v:IsA("BasePart") and (v.Name:lower():find("vip") or v.Name:lower():find("wall")) then v.CanCollide = true; v.Transparency = 0 end end
+    end
+end)
+
+-- ATRAVESSAR PAREDES + PONTE ROXA
+WallClipBtn.MouseButton1Click:Connect(function()
+    wallClipActive = not wallClipActive
+    if wallClipActive then
+        WallClipBtn.Text = "ATRAVESSAR: ON"; WallClipBtn.BackgroundColor3 = Color3.fromRGB(160, 32, 240)
+        
+        task.spawn(function()
+            local purpleColor = Color3.fromRGB(160, 32, 240)
+            local bridgeFolder = Instance.new("Folder", workspace)
+            bridgeFolder.Name = "Bridge_System"
+            
+            while wallClipActive do
+                local char = player.Character
+                if char then
+                    for _, part in pairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") then part.CanCollide = false end
+                    end
+                    
+                    if char:FindFirstChild("HumanoidRootPart") then
+                        local root = char.HumanoidRootPart
+                        local plate = Instance.new("Part")
+                        plate.Size = Vector3.new(8, 0.5, 8)
+                        plate.Position = root.Position - Vector3.new(0, 3.5, 0)
+                        plate.Anchored = true
+                        plate.Color = purpleColor
+                        plate.Material = Enum.Material.Neon
+                        plate.Transparency = 0.4
+                        plate.Parent = bridgeFolder
+                        
+                        task.delay(1.5, function() if plate then plate:Destroy() end end)
+                    end
+                end
+                task.wait(0.05)
+            end
+            bridgeFolder:Destroy()
+            
+            local char = player.Character
+            if char then
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = true end
+                end
+            end
+        end)
+    else
+        WallClipBtn.Text = "ATRAVESSAR PAREDES"; WallClipBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    end
+end)
+
+-- GOD MODE RESTAURADO (VERSÃO ORIGINAL DE CURA)
+GodModeBtn.MouseButton1Click:Connect(function()
+    godActive = not godActive
+    if godActive then
+        GodModeBtn.Text = "GOD MODE: ON"; GodModeBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 150)
+        task.spawn(function() 
+            while godActive do 
+                if player.Character and player.Character:FindFirstChild("Humanoid") then 
+                    player.Character.Humanoid.Health = player.Character.Humanoid.MaxHealth
+                    player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false) 
+                end
+                task.wait(0.1) 
+            end 
+        end)
+    else
+        GodModeBtn.Text = "ATIVAR GOD MODE"; GodModeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+        end
+    end
+end)
+
+-- TP SEGURO
+SaveTPBtn.MouseButton1Click:Connect(function()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        savedPos = player.Character.HumanoidRootPart.CFrame
+        StatusLabel.Text = "Posição Salva!"; task.wait(1); StatusLabel.Text = "Status: Pronto"
+    end
+end)
+
+TeleportBtn.MouseButton1Click:Connect(function()
+    if savedPos and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local char = player.Character
+        local root = char.HumanoidRootPart
+        StatusLabel.Text = "Teleportando..."; StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        for _, p in pairs(char:GetChildren()) do if p:IsA("BasePart") then p.CanTouch = false end end
+        root.CFrame = savedPos
+        task.wait(3)
+        if not vipActive then for _, p in pairs(char:GetChildren()) do if p:IsA("BasePart") then p.CanTouch = true end end end
+        StatusLabel.Text = "Status: Pronto"; StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+    else
+        StatusLabel.Text = "Nenhuma Posição Salva!"; task.wait(1); StatusLabel.Text = "Status: Pronto"
+    end
+end)
+
+-- AUTO-PEGA AO ENCOSTAR (TOUCH)
+BrainrotBtn.MouseButton1Click:Connect(function()
+    brainrotActive = not brainrotActive
+    if brainrotActive then
+        BrainrotBtn.Text = "AUTO-PEGA: ON"; BrainrotBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+        task.spawn(function()
+            while brainrotActive do
+                local char = player.Character
+                if char then
+                    for _, v in pairs(workspace:GetDescendants()) do
+                        if v:IsA("ProximityPrompt") or v:IsA("ClickDetector") then
+                            local itemPart = v.Parent
+                            if itemPart:IsA("BasePart") then
+                                local dist = (itemPart.Position - char.PrimaryPart.Position).Magnitude
+                                if dist < 8 then
+                                    if v:IsA("ProximityPrompt") then
+                                        v.HoldDuration = 0
+                                        fireproximityprompt(v)
+                                    else
+                                        fireclickdetector(v)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    else
+        BrainrotBtn.Text = "AUTO-PEGA: OFF"; BrainrotBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    end
+end)
+
+-- INICIAR INTRO
+task.spawn(runIntro)
+
+-- ARRASTAR E TOGGLE
+ToggleBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+
+local UserInputService = game:GetService("UserInputService")
+local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true; dragStart = input.Position; startPos = frame.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+        end
+    end)
+    frame.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+makeDraggable(MainFrame); makeDraggable(ToggleBtn)
