@@ -1,0 +1,217 @@
+--[[
+    AFK HUB - DELTA EDITION (FIXED & ROBUST)
+    Funcionalidades Corrigidas: 
+    - Auto-Pega (Sistema de Detecção Universal)
+    - Max Brainrot (Upgrade Automático ao clicar)
+    - Atravessar Paredes + Ponte Roxa
+    - God Mode (Cura Rápida)
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+
+local player = Players.LocalPlayer
+local states = {
+    vipDeleted = false,
+    godMode = false,
+    autoCollect = false,
+    wallClip = false,
+    maxLevel = false
+}
+
+-- Interface
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AFKHub_Fixed"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 220, 0, 350)
+MainFrame.Position = UDim2.new(0.5, -110, 0.5, -175)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MainFrame.BorderSizePixel = 0
+MainFrame.Visible = true
+MainFrame.Parent = ScreenGui
+
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+local stroke = Instance.new("UIStroke", MainFrame)
+stroke.Color = Color3.fromRGB(160, 32, 240)
+stroke.Thickness = 3
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundTransparency = 1
+Title.Text = "AFK HUB FIXED"
+Title.TextColor3 = Color3.fromRGB(160, 32, 240)
+Title.TextSize = 20
+Title.Font = Enum.Font.GothamBold
+
+local function createBtn(text, pos, callback)
+    local btn = Instance.new("TextButton", MainFrame)
+    btn.Size = UDim2.new(0.85, 0, 0, 38)
+    btn.Position = pos
+    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamSemibold
+    btn.TextSize = 12
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    btn.MouseButton1Click:Connect(function() callback(btn) end)
+    return btn
+end
+
+-- BOTOES
+local btnVip = createBtn("DELETAR VIP", UDim2.new(0.075, 0, 0.15, 0), function(btn)
+    states.vipDeleted = not states.vipDeleted
+    btn.BackgroundColor3 = states.vipDeleted and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(25, 25, 25)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") and (v.Name:lower():find("vip") or v.Name:lower():find("wall")) then
+            v.CanCollide = not states.vipDeleted
+            v.Transparency = states.vipDeleted and 0.6 or 0
+        end
+    end
+end)
+
+local btnGod = createBtn("GOD MODE: OFF", UDim2.new(0.075, 0, 0.3, 0), function(btn)
+    states.godMode = not states.godMode
+    btn.Text = states.godMode and "GOD MODE: ON" or "GOD MODE: OFF"
+    btn.BackgroundColor3 = states.godMode and Color3.fromRGB(160, 32, 240) or Color3.fromRGB(25, 25, 25)
+end)
+
+local btnClip = createBtn("ATRAVESSAR PAREDES", UDim2.new(0.075, 0, 0.45, 0), function(btn)
+    states.wallClip = not states.wallClip
+    btn.BackgroundColor3 = states.wallClip and Color3.fromRGB(160, 32, 240) or Color3.fromRGB(25, 25, 25)
+end)
+
+local btnAuto = createBtn("AUTO-PEGA: OFF", UDim2.new(0.075, 0, 0.6, 0), function(btn)
+    states.autoCollect = not states.autoCollect
+    btn.Text = states.autoCollect and "AUTO-PEGA: ON" or "AUTO-PEGA: OFF"
+    btn.BackgroundColor3 = states.autoCollect and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(25, 25, 25)
+end)
+
+local btnMax = createBtn("MAX BRAINROT: OFF", UDim2.new(0.075, 0, 0.75, 0), function(btn)
+    states.maxLevel = not states.maxLevel
+    btn.Text = states.maxLevel and "MAX BRAINROT: ON" or "MAX BRAINROT: OFF"
+    btn.BackgroundColor3 = states.maxLevel and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(25, 25, 25)
+    btn.TextColor3 = states.maxLevel and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
+end)
+
+-- TOGGLE BUTTON
+local Toggle = Instance.new("TextButton", ScreenGui)
+Toggle.Size = UDim2.new(0, 50, 0, 50)
+Toggle.Position = UDim2.new(0, 10, 0.5, 0)
+Toggle.Text = "AFK"
+Toggle.BackgroundColor3 = Color3.fromRGB(160, 32, 240)
+Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", Toggle).CornerRadius = UDim.new(1, 0)
+Toggle.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+
+-- LOOPS DE SERVIÇO
+RunService.Stepped:Connect(function()
+    if not player.Character then return end
+    
+    -- God Mode
+    if states.godMode and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.Health = player.Character.Humanoid.MaxHealth
+    end
+    
+    -- NoClip + Ponte Roxa
+    if states.wallClip then
+        for _, v in pairs(player.Character:GetDescendants()) do
+            if v:IsA("BasePart") then v.CanCollide = false end
+        end
+        local root = player.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            local p = Instance.new("Part", workspace)
+            p.Size = Vector3.new(8, 0.4, 8); p.CFrame = root.CFrame * CFrame.new(0, -3.5, 0)
+            p.Anchored = true; p.Color = Color3.fromRGB(160, 32, 240); p.Material = Enum.Material.Neon; p.Transparency = 0.5
+            task.delay(1.2, function() p:Destroy() end)
+        end
+    end
+end)
+
+-- AUTO-PEGA CORRIGIDO (DETECÇÃO DIRETA)
+task.spawn(function()
+    while true do
+        if states.autoCollect and player.Character and player.Character:FindFirstChild("PrimaryPart") then
+            local charPos = player.Character.PrimaryPart.Position
+            for _, v in pairs(workspace:GetDescendants()) do
+                if not states.autoCollect then break end
+                if v:IsA("ProximityPrompt") or v:IsA("ClickDetector") then
+                    local parent = v.Parent
+                    if parent and parent:IsA("BasePart") then
+                        if (parent.Position - charPos).Magnitude < 15 then
+                            if v:IsA("ProximityPrompt") then
+                                fireproximityprompt(v)
+                            else
+                                fireclickdetector(v)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        task.wait(0.3)
+    end
+end)
+
+-- MAX BRAINROT CORRIGIDO (DETECÇÃO DE UI)
+UserInputService.InputBegan:Connect(function(input, processed)
+    if states.maxLevel and processed and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+        local pGui = player:FindFirstChild("PlayerGui")
+        if pGui then
+            -- Procura por qualquer botão que pareça ser de upgrade
+            for _, v in pairs(pGui:GetDescendants()) do
+                if v:IsA("TextButton") or v:IsA("ImageButton") then
+                    -- Critérios: Visível, Cor amarela/verde, ou Texto de nível
+                    local isYellow = v.BackgroundColor3.R > 0.7 and v.BackgroundColor3.G > 0.7
+                    local hasLevelText = false
+                    if v:IsA("TextButton") and (v.Text:lower():find("nível") or v.Text:lower():find("level") or v.Text:find(">")) then
+                        hasLevelText = true
+                    end
+                    
+                    if v.Visible and (isYellow or hasLevelText) then
+                        -- Simula compra rápida
+                        task.spawn(function()
+                            for i = 1, 30 do
+                                if not states.maxLevel then break end
+                                -- Tenta disparar todos os eventos possíveis de clique
+                                if v.MouseButton1Click then
+                                    for _, conn in pairs(getconnections(v.MouseButton1Click)) do conn:Fire() end
+                                end
+                                if v.MouseButton1Down then
+                                    for _, conn in pairs(getconnections(v.MouseButton1Down)) do conn:Fire() end
+                                end
+                                if v.Activated then
+                                    for _, conn in pairs(getconnections(v.Activated)) do conn:Fire() end
+                                end
+                                task.wait(0.02)
+                            end
+                        end)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- Draggable
+local function makeDraggable(obj)
+    local dragging, dragInput, dragStart, startPos
+    obj.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true; dragStart = input.Position; startPos = obj.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+        end
+    end)
+    obj.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            obj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+makeDraggable(MainFrame); makeDraggable(Toggle)
